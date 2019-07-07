@@ -75,6 +75,7 @@ public class WordCount {
 			// split up the lines in pairs (2-tuples) containing: (word,1)
 			text.flatMap(new Tokenizer())
 			// group by the tuple field "0" and sum up tuple field "1"
+			// 得到所有输入文字中，每个单词的个数，会对所有输入计算完成后输出
 			.keyBy(0).sum(1);
 
 		// emit result
@@ -98,6 +99,8 @@ public class WordCount {
 	 * user-defined FlatMapFunction. The function takes a line (String) and
 	 * splits it into multiple pairs in the form of "(word,1)" ({@code Tuple2<String,
 	 * Integer>}).
+	 * 自定义FlatMapFunction<IN,OUT>的实现。
+	 * 将一行文字分出各个单词
 	 */
 	public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Integer>> {
 
