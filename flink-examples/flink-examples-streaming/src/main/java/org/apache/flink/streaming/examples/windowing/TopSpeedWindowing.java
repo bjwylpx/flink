@@ -70,10 +70,15 @@ public class TopSpeedWindowing {
 		int evictionSec = 10;
 		double triggerMeters = 50;
 		DataStream<Tuple4<Integer, Integer, Double, Long>> topSpeeds = carData
+				//分配时间戳和水印
 				.assignTimestampsAndWatermarks(new CarTimestamp())
+				//按车辆进行分组
 				.keyBy(0)
+				//时间窗口
 				.window(GlobalWindows.create())
+				//剔除器，按时间将超过指定指定时间的数据给剔除掉
 				.evictor(TimeEvictor.of(Time.of(evictionSec, TimeUnit.SECONDS)))
+				//触发器，增量触发器，增量超过指定的
 				.trigger(DeltaTrigger.of(triggerMeters,
 						new DeltaFunction<Tuple4<Integer, Integer, Double, Long>>() {
 							private static final long serialVersionUID = 1L;
@@ -85,6 +90,7 @@ public class TopSpeedWindowing {
 								return newDataPoint.f2 - oldDataPoint.f2;
 							}
 						}, carData.getType().createSerializer(env.getConfig())))
+				//最高速度
 				.maxBy(1);
 
 		if (params.has("output")) {
@@ -120,6 +126,7 @@ public class TopSpeedWindowing {
 		private CarSource(int numOfCars) {
 			speeds = new Integer[numOfCars];
 			distances = new Double[numOfCars];
+			//初始速度，与距离
 			Arrays.fill(speeds, 50);
 			Arrays.fill(distances, 0d);
 		}
@@ -140,6 +147,7 @@ public class TopSpeedWindowing {
 						speeds[carId] = Math.max(0, speeds[carId] - 5);
 					}
 					distances[carId] += speeds[carId] / 3.6d;
+					//ID，速度，距离，时间
 					Tuple4<Integer, Integer, Double, Long> record = new Tuple4<>(carId,
 							speeds[carId], distances[carId], System.currentTimeMillis());
 					ctx.collect(record);
@@ -164,6 +172,9 @@ public class TopSpeedWindowing {
 		}
 	}
 
+	/**
+	* 时间戳和水印
+	*/
 	private static class CarTimestamp extends AscendingTimestampExtractor<Tuple4<Integer, Integer, Double, Long>> {
 		private static final long serialVersionUID = 1L;
 
