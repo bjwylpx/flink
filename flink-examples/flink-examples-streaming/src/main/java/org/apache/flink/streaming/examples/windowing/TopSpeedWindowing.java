@@ -63,6 +63,7 @@ public class TopSpeedWindowing {
 		} else {
 			System.out.println("Executing TopSpeedWindowing example with default input data set.");
 			System.out.println("Use --input to specify file input.");
+			//使用模拟的数据
 			carData = env.addSource(CarSource.create(2));
 		}
 
@@ -100,6 +101,9 @@ public class TopSpeedWindowing {
 	// USER FUNCTIONS
 	// *************************************************************************
 
+	/**
+	* 数据源
+	*/
 	private static class CarSource implements SourceFunction<Tuple4<Integer, Integer, Double, Long>> {
 
 		private static final long serialVersionUID = 1L;
@@ -110,6 +114,9 @@ public class TopSpeedWindowing {
 
 		private volatile boolean isRunning = true;
 
+		/**
+		* 指定车数量
+		*/
 		private CarSource(int numOfCars) {
 			speeds = new Integer[numOfCars];
 			distances = new Double[numOfCars];
